@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Candidate Review System</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top left,
+                    #1e293b,
+                    #020617 45%
+                );
+
+            color: #e5e7eb;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: min(1100px, 92%);
+            margin: auto;
+            padding: 40px 0 70px;
+        }
+
+        .header {
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, .12);
+            color: #86efac;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: clamp(34px, 5vw, 58px);
+            line-height: 1.05;
+            margin: 0 0 15px;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 17px;
+            max-width: 700px;
+            line-height: 1.7;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, .82);
+            border: 1px solid rgba(148, 163, 184, .15);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 22px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+            backdrop-filter: blur(15px);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 21px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 13px 14px;
+            background: #020617;
+            color: #e5e7eb;
+            font: inherit;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #60a5fa;
+        }
+
+        textarea {
+            min-height: 190px;
+            resize: vertical;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .field {
+            margin-bottom: 22px;
+        }
+
+        .upload {
+            border: 1px dashed #475569;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
+        .sample {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 15px;
+            background: rgba(59, 130, 246, .08);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .sample input {
+            width: auto;
+        }
+
+        .button {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            background: #2563eb;
+            color: white;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .button:hover {
+            background: #3b82f6;
+            transform: translateY(-1px);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, .12);
+            border: 1px solid rgba(239, 68, 68, .3);
+            color: #fca5a5;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .agents {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .agent {
+            padding: 16px;
+            border-radius: 12px;
+            background: #020617;
+            border: 1px solid #1e293b;
+            text-align: center;
+        }
+
+        .agent-icon {
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        .agent-name {
+            font-weight: 700;
+        }
+
+        .agent-description {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        .info {
+            color: #94a3b8;
+            line-height: 1.7;
+        }
+
+        @media(max-width: 800px) {
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .agents {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+        @media(max-width: 500px) {
+
+            .agents {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <div class="badge">
+            ● DUMMY LLM • OFFLINE MODE
+        </div>
+
+        <h1>
+            Candidate Review System
+        </h1>
+
+        <p class="subtitle">
+            Multi-agent candidate evaluation using
+            Technical, HR, Hiring Manager and Skeptic
+            perspectives with evidence-weighted reasoning.
+        </p>
+
+    </div>
+
+
+    {% if error %}
+
+    <div class="error">
+        {{ error }}
+    </div>
+
+    {% endif %}
+
+
+    <form
+        action="/evaluate"
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        <div class="card">
+
+            <h2>
+                Candidate Information
+            </h2>
+
+            <div class="grid">
+
+                <div class="field">
+
+                    <label>
+                        Candidate Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="candidate_name"
+                        placeholder="e.g. Rohan Malhotra"
+                    >
+
+                </div>
+
+                <div class="field">
+
+                    <label>
+                        Job Description
+                    </label>
+
+                    <input
+                        type="text"
+                        name="job_description"
+                        placeholder="e.g. Senior AI Engineer"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="sample">
+
+                <input
+                    type="checkbox"
+                    name="use_sample"
+                    id="sample"
+                >
+
+                <label
+                    for="sample"
+                    style="margin:0;"
+                >
+                    Use built-in sample candidate
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>
+                Resume
+            </h2>
+
+            <div class="field">
+
+                <label>
+                    Paste Resume
+                </label>
+
+                <textarea
+                    name="resume_text"
+                    placeholder="Paste candidate resume here..."
+                ></textarea>
+
+                <div class="upload">
+
+                    <label>
+                        Or upload a text file
+                    </label>
+
+                    <input
+                        type="file"
+                        name="resume_file"
+                        accept=".txt,.md,.csv,.json"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>
+                Interview Transcript
+            </h2>
+
+            <div class="field">
+
+                <label>
+                    Paste Interview Transcript
+                </label>
+
+                <textarea
+                    name="transcript_text"
+                    placeholder="Paste interview transcript here..."
+                ></textarea>
+
+                <div class="upload">
+
+                    <label>
+                        Or upload a text file
+                    </label>
+
+                    <input
+                        type="file"
+                        name="transcript_file"
+                        accept=".txt,.md,.csv,.json"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>
+                Multi-Agent Review
+            </h2>
+
+            <p class="info">
+                Your candidate will be independently reviewed
+                by four specialized agents before entering a
+                three-round debate.
+            </p>
+
+            <div class="agents">
+
+                <div class="agent">
+
+                    <div class="agent-icon">
+                        🧑‍💻
+                    </div>
+
+                    <div class="agent-name">
+                        Technical
+                    </div>
+
+                    <div class="agent-description">
+                        Technical depth
+                    </div>
+
+                </div>
+
+                <div class="agent">
+
+                    <div class="agent-icon">
+                        🤝
+                    </div>
+
+                    <div class="agent-name">
+                        HR
+                    </div>
+
+                    <div class="agent-description">
+                        Communication & culture
+                    </div>
+
+                </div>
+
+                <div class="agent">
+
+                    <div class="agent-icon">
+                        🎯
+                    </div>
+
+                    <div class="agent-name">
+                        Hiring Manager
+                    </div>
+
+                    <div class="agent-description">
+                        Role fit & delivery
+                    </div>
+
+                </div>
+
+                <div class="agent">
+
+                    <div class="agent-icon">
+                        🔍
+                    </div>
+
+                    <div class="agent-name">
+                        Skeptic
+                    </div>
+
+                    <div class="agent-description">
+                        Risks & contradictions
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="button"
+        >
+            Run Candidate Review →
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+
+</html>
