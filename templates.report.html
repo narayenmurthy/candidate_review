@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Candidate Review Report</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family:
+        Inter,
+        system-ui,
+        sans-serif;
+    background: #020617;
+    color: #e5e7eb;
+}
+
+.container {
+    width: min(1150px, 92%);
+    margin: auto;
+    padding: 40px 0 70px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 38px;
+}
+
+.subtitle {
+    color: #94a3b8;
+}
+
+.card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 18px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.card h2 {
+    margin-top: 0;
+}
+
+.decision {
+    padding: 30px;
+    border-radius: 18px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.decision.hire {
+    background: rgba(34,197,94,.12);
+    border: 1px solid rgba(34,197,94,.3);
+}
+
+.decision.maybe {
+    background: rgba(234,179,8,.12);
+    border: 1px solid rgba(234,179,8,.3);
+}
+
+.decision.reject {
+    background: rgba(239,68,68,.12);
+    border: 1px solid rgba(239,68,68,.3);
+}
+
+.decision h2 {
+    font-size: 42px;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.confidence {
+    font-size: 18px;
+    color: #94a3b8;
+    margin-top: 8px;
+}
+
+.agents {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.agent {
+    background: #020617;
+    border: 1px solid #1e293b;
+    padding: 18px;
+    border-radius: 14px;
+}
+
+.agent h3 {
+    margin-top: 0;
+}
+
+.score {
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.decision-text {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.evidence {
+    padding: 15px;
+    background: #020617;
+    border-left: 3px solid #3b82f6;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.source {
+    display: block;
+    color: #60a5fa;
+    font-size: 12px;
+    margin-top: 7px;
+}
+
+li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 18px;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    margin-right: 8px;
+}
+
+.secondary {
+    background: #1e293b;
+}
+
+@media(max-width: 800px) {
+    .agents {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media(max-width: 500px) {
+    .agents {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+
+<div>
+
+<h1>
+Candidate Report
+</h1>
+
+<p class="subtitle">
+{{ candidate_name }}
+</p>
+
+</div>
+
+<div>
+
+<a
+href="/"
+class="button secondary"
+>
+← New Review
+</a>
+
+<a
+href="/outputs/{{ output_file }}"
+class="button"
+>
+Download JSON
+</a>
+
+</div>
+
+</div>
+
+
+{% set decision = report.recommendation|lower %}
+
+<div class="decision {{ decision }}">
+
+<h2>
+{{ decision }}
+</h2>
+
+<div class="confidence">
+
+Confidence:
+{{ "%.1f"|format(report.confidence * 100) }}%
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Agent Panel
+</h2>
+
+<div class="agents">
+
+{% for agent in report.agent_summaries %}
+
+<div class="agent">
+
+<h3>
+{{ agent.role }}
+</h3>
+
+<div class="score">
+{{ "%.0f"|format(agent.score) }}
+</div>
+
+<div class="decision-text">
+{{ agent.decision }}
+</div>
+
+<p>
+{{ agent.rationale }}
+</p>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Decisive Evidence
+</h2>
+
+{% for evidence in report.decisive_evidence %}
+
+<div class="evidence">
+
+{{ evidence.quote }}
+
+<span class="source">
+{{ evidence.source }}
+</span>
+
+</div>
+
+{% else %}
+
+<p>
+No decisive evidence was returned.
+</p>
+
+{% endfor %}
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Strengths
+</h2>
+
+<ul>
+
+{% for strength in report.strengths %}
+
+<li>
+{{ strength }}
+</li>
+
+{% else %}
+
+<li>
+No strengths identified.
+</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Concerns
+</h2>
+
+<ul>
+
+{% for concern in report.concerns %}
+
+<li>
+{{ concern }}
+</li>
+
+{% else %}
+
+<li>
+No major concerns identified.
+</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Debate History
+</h2>
+
+{% for debate in report.debate_history %}
+
+<div class="evidence">
+
+<strong>
+Round {{ debate.round_index + 1 }}
+—
+{{ debate.agent_id }}
+</strong>
+
+<p>
+{{ debate.text }}
+</p>
+
+{% if debate.replies_to %}
+
+<span class="source">
+Replied to: {{ debate.replies_to }}
+</span>
+
+{% endif %}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Reasoning
+</h2>
+
+<ul>
+
+{% for reason in report.reasoning %}
+
+<li>
+{{ reason }}
+</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+
+{% if report.unresolved_disagreements %}
+
+<div class="card">
+
+<h2>
+Unresolved Disagreements
+</h2>
+
+<ul>
+
+{% for disagreement in report.unresolved_disagreements %}
+
+<li>
+{{ disagreement }}
+</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+{% endif %}
+
+
+</div>
+
+</body>
+
+</html>
